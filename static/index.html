@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floola-Next: Modern iPod Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER / TITLE BAR -->
+        <header class="app-header">
+            <div class="brand">
+                <img src="icons/ipod.png" alt="iPod" class="brand-icon">
+                <h1>Floola<span>Next</span></h1>
+            </div>
+            <div class="connection-status" id="connection-status">
+                <span class="status-indicator online"></span>
+                <span id="connection-text">Virtual Mode</span>
+            </div>
+        </header>
+
+        <!-- TOOLBAR / CONTROL BAR -->
+        <section class="control-bar">
+            <!-- Playback Controls -->
+            <div class="playback-controls">
+                <button class="ctrl-btn" id="prev-btn" title="Previous">
+                    <img src="icons/rw.png" alt="Prev">
+                </button>
+                <button class="ctrl-btn play-pause" id="play-pause-btn" title="Play/Pause">
+                    <img src="icons/play.png" alt="Play" id="play-icon">
+                </button>
+                <button class="ctrl-btn" id="next-btn" title="Next">
+                    <img src="icons/ff.png" alt="Next">
+                </button>
+            </div>
+
+            <!-- Current Track / Seek Info -->
+            <div class="now-playing-container">
+                <div class="now-playing-header" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <div class="now-playing-info">
+                        <span id="current-track-title">No track loaded</span>
+                        <span id="current-track-artist">Double-click a track to play</span>
+                    </div>
+                    <div class="player-toggle-container" style="display:flex; align-items:center; gap:8px; margin-right:4px;">
+                        <span class="toggle-label" style="font-size:11px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">System Player</span>
+                        <label class="switch">
+                            <input type="checkbox" id="player-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="seek-bar-wrapper">
+                    <span id="current-time">0:00</span>
+                    <input type="range" id="seek-slider" min="0" value="0" step="1" disabled>
+                    <span id="total-time">0:00</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons & Search -->
+            <div class="action-bar">
+                <button class="action-btn" id="add-track-btn" title="Add Music to iPod">
+                    <img src="icons/songicon.png" alt="Add" class="btn-img"> Add
+                </button>
+                <button class="action-btn" id="export-track-btn" title="Export Selected Track to Mac" disabled>
+                    <img src="icons/savetopc.png" alt="Export" class="btn-img"> Export
+                </button>
+                <button class="action-btn danger" id="delete-track-btn" title="Delete Selected Track" disabled>
+                    <img src="icons/statuserror.png" alt="Delete" class="btn-img"> Delete
+                </button>
+                
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" placeholder="Search iPod...">
+                    <img src="icons/SearchWell.png" alt="Search" class="search-icon">
+                </div>
+
+                <!-- Tools Dropdown -->
+                <div class="dropdown">
+                    <button class="action-btn dropdown-toggle" id="tools-btn">
+                         Tools ▼
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" id="tool-repair"><img src="icons/statusok.png" alt="Repair" class="menu-icon"> Repair Checksums</a>
+                        <a href="#" id="tool-redetect"><img src="icons/refresh.png" alt="Redetect" class="menu-icon"> Re-detect iPod</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-body">
+            <!-- Left Side / Center: Tracks List -->
+            <section class="tracks-pane">
+                <div class="table-container" id="drop-zone">
+                    <div class="drop-overlay">
+                        <img src="icons/drag.png" alt="Drag and Drop">
+                        <h3>Drag audio files here to add them to your iPod</h3>
+                    </div>
+                    <table class="tracks-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;" data-sort="title">Title</th>
+                                <th style="width: 20%;" data-sort="artist">Artist</th>
+                                <th style="width: 20%;" data-sort="album">Album</th>
+                                <th style="width: 10%;" data-sort="genre">Genre</th>
+                                <th style="width: 80px;" data-sort="duration">Time</th>
+                                <th style="width: 80px;" data-sort="rating">Rating</th>
+                                <th style="width: 100px;" data-sort="play_count">Play Count</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tracks-list-body">
+                            <tr>
+                                <td colspan="7" class="loading-cell">Loading iPod database...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Right Side: Sidebar (Classic Floola Layout!) -->
+            <aside class="sidebar-pane">
+                <div class="sidebar-section">
+                    <h3>Media Categories</h3>
+                    <ul class="category-list">
+                        <li class="active" data-category="all">
+                            <img src="icons/songicon.png" alt="Music" class="sidebar-icon"> Music
+                        </li>
+                        <li data-category="podcasts">
+                            <img src="icons/podcasticon.png" alt="Podcasts" class="sidebar-icon"> Podcasts
+                        </li>
+                        <li data-category="videos">
+                            <img src="icons/videoicon.png" alt="Videos" class="sidebar-icon"> Videos
+                        </li>
+                        <li data-category="photos">
+                            <img src="icons/photo.png" alt="Photos" class="sidebar-icon"> Photos
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section playlists-section">
+                    <div class="section-header">
+                        <h3>Playlists</h3>
+                        <button class="small-add-btn" id="new-playlist-btn" title="New Playlist">+</button>
+                    </div>
+                    <ul class="playlist-list" id="playlist-list-body">
+                        <!-- Playlists loaded dynamically -->
+                    </ul>
+                </div>
+            </aside>
+        </main>
+
+        <!-- STATUS BAR / FOOTER -->
+        <footer class="app-status-bar">
+            <div class="device-stats">
+                <span id="device-model-label">Loading device...</span>
+                <span class="divider">|</span>
+                <span id="tracks-count-label">0 tracks</span>
+                <span class="divider">|</span>
+                <span id="mountpoint-label">Path: -</span>
+            </div>
+            
+            <div class="storage-stats-container">
+                <span class="storage-text" id="storage-label">Used: - / Total: -</span>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar-fill" id="storage-progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- METADATA EDITOR MODAL -->
+    <div class="modal-overlay" id="metadata-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Edit Track Metadata</h2>
+                <button class="close-btn" onclick="closeModal('metadata-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="metadata-form">
+                    <input type="hidden" id="edit-track-id">
+                    <div class="form-group">
+                        <label for="edit-title">Title</label>
+                        <input type="text" id="edit-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-artist">Artist</label>
+                        <input type="text" id="edit-artist">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-album">Album</label>
+                        <input type="text" id="edit-album">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-genre">Genre</label>
+                        <input type="text" id="edit-genre">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="edit-year">Year</label>
+                            <input type="number" id="edit-year" min="0" max="2099">
+                        </div>
+                        <div class="form-group half">
+                            <label for="edit-track-number">Track #</label>
+                            <input type="number" id="edit-track-number" min="0" max="999">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-rating">Rating (Stars)</label>
+                        <select id="edit-rating">
+                            <option value="0">☆☆☆☆☆ (0)</option>
+                            <option value="1">★☆☆☆☆ (1)</option>
+                            <option value="2">★★☆☆☆ (2)</option>
+                            <option value="3">★★★☆☆ (3)</option>
+                            <option value="4">★★★★☆ (4)</option>
+                            <option value="5">★★★★★ (5)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('metadata-modal')">Cancel</button>
+                <button class="btn primary" id="save-metadata-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW PLAYLIST MODAL -->
+    <div class="modal-overlay" id="playlist-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Create New Playlist</h2>
+                <button class="close-btn" onclick="closeModal('playlist-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="playlist-name-input">Playlist Name</label>
+                    <input type="text" id="playlist-name-input" placeholder="e.g. Workout Hits" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('playlist-modal')">Cancel</button>
+                <button class="btn primary" id="create-playlist-submit">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD MUSIC MODAL -->
+    <div class="modal-overlay" id="add-music-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Add Track to iPod</h2>
+                <button class="close-btn" onclick="closeModal('add-music-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-music-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="add-file-input">Select Audio File (MP3, M4A, etc.)</label>
+                        <input type="file" id="add-file-input" accept="audio/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-title">Title (Optional)</label>
+                        <input type="text" id="add-title" placeholder="Extracted from tags if left blank">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-artist">Artist (Optional)</label>
+                        <input type="text" id="add-artist">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-album">Album (Optional)</label>
+                        <input type="text" id="add-album">
+                    </div>
+                    <div class="form-group">
+                        <label for="add-genre">Genre (Optional)</label>
+                        <input type="text" id="add-genre">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="add-year">Year (Optional)</label>
+                            <input type="number" id="add-year" min="0" max="2099">
+                        </div>
+                        <div class="form-group half">
+                            <label for="add-track-number">Track # (Optional)</label>
+                            <input type="number" id="add-track-number" min="0" max="999">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-rating">Rating (Optional)</label>
+                        <select id="add-rating">
+                            <option value="0">☆☆☆☆☆</option>
+                            <option value="1">★☆☆☆☆</option>
+                            <option value="2">★★☆☆☆</option>
+                            <option value="3">★★★☆☆</option>
+                            <option value="4">★★★★☆</option>
+                            <option value="5">★★★★★</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('add-music-modal')">Cancel</button>
+                <button class="btn primary" id="add-track-submit">Upload to iPod</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEXT MENU -->
+    <div class="context-menu" id="track-context-menu">
+        <ul>
+            <li id="menu-edit"><img src="icons/languages.png" alt="Edit" class="menu-icon"> Edit Metadata</li>
+            <li id="menu-export"><img src="icons/savetopc.png" alt="Export" class="menu-icon"> Export to Mac</li>
+            <li id="menu-reveal-finder"><img src="icons/folder.png" alt="Finder" class="menu-icon"> Show in Finder</li>
+            <li class="menu-separator"></li>
+            <li id="menu-show-playlist">
+                <span>🔍 Show in Playlist</span>
+                <ul class="context-submenu" id="context-show-playlist-submenu">
+                    <!-- Loaded dynamically -->
+                </ul>
+            </li>
+            <li id="menu-add-playlist">
+                <span>➕ Add to Playlist</span>
+                <ul class="context-submenu" id="context-playlist-submenu">
+                    <!-- Loaded dynamically -->
+                </ul>
+            </li>
+            <li class="menu-separator"></li>
+            <li id="menu-delete" class="danger"><img src="icons/statuserror.png" alt="Delete" class="menu-icon"> Delete from iPod</li>
+        </ul>
+    </div>
+
+    <!-- Hidden audio element for preview playing -->
+    <audio id="audio-preview-player"></audio>
+
+    <script src="app.js"></script>
+</body>
+</html>
